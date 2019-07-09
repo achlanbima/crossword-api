@@ -13,6 +13,10 @@ class Answer extends Model {
       .pivotTable('user_answers')
   }
 
+  user_answers () {
+    return this.hasMany('App/Models/UserAnswer')
+  }
+
 }
 
 module.exports = Answer

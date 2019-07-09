@@ -4,6 +4,13 @@
 const Model = use('Model')
 
 class UserCrossword extends Model {
+  static get createdAtColumn () {
+    return null;
+  }
+
+  static get updatedAtColumn () {
+    return null;
+  }
   crossword(){
     return this.belongsTo('App/Models/Crosswords')
   }

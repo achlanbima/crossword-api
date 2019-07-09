@@ -20,7 +20,7 @@ class CrosswordController {
    * @param {View} ctx.view
    */
   async index ({ request, response, view }) {
-    const crossword = await Crossword.query().with('user_crossword').fetch();
+    const crossword = await Crossword.query().with('user_crossword', uc => uc.where('user_id','2')).fetch();
 
     crossword.rows.map((cw) => {
       cw.$relations.user_crossword.rows.map((ucw) => {

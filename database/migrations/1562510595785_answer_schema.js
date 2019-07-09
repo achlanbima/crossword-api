@@ -13,6 +13,7 @@ class AnswerSchema extends Schema {
       table.string('answer').notNullable()
       table.boolean('is_clue').notNullable()
       table.string('indexes').notNullable()
+      table.enu('type',['Across','Down']).notNullable()
 
       table.foreign('crossword_id').references('crosswords.id')
     })

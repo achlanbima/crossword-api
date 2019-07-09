@@ -55,12 +55,18 @@ class AuthController {
     await user.crosswords().attach(crosswordIds)
     await user.answers().attach(answerIds)
 
-    user.crosswords = await user.crosswords().fetch()
-    user.answers = await user.answers().fetch()
+    // user.crosswords = await user.crosswords().fetch()
+    // user.answers = await user.answers().fetch()
 
     return response.status(200).send({message: "Register Success", data:user})
   }
 
+  async login({request, response, auth}) {
+    const {email, password} = request.only(['email', 'password'])
+    const token = await auth.attempt(email, password)
+    return response.json({token})
 }
 
+
+}
 module.exports = AuthController

@@ -18,11 +18,13 @@ const Route = use('Route')
 
 
 Route.post('/register', 'AuthController.register')
+Route.post('/login', 'AuthController.login')
 
 
 Route.group(()=>{
   Route.get('/', 'CrosswordController.index')
   Route.get('/:id/answers', 'AnswerController.show')
+  Route.patch('/:id/answers', 'AnswerController.update')
 }).prefix('crosswords')
 
 Route.group(()=>{
