@@ -64,22 +64,23 @@ class AnswerController {
    * @param {View} ctx.view
    */
   async show ({ params, request, response, view }) {
-    const answers = await Answer.query().where('crossword_id',params.id).with('user_answers').fetch()
+    const answers = await Answer.query().where('crossword_id',params.id).fetch()
     // const userAnswers = await UserAnswer.query().where('user_id',1).fetch()
 
+    let availableIndexes = []
     answers.rows.map((row, index) => {
       if(row.is_clue){
         row.is_clue = true  
       }else{
         row.is_clue = false  
       }
-      row.indexes = row.indexes.split(' ')  
+      row.indexes = row.indexes.split(' ')
+      availableIndexes.push(row.indexes)
     })
-
 
     response.status(200).json({
       message: "Successfully retrieved answers with related crosswords",
-      data: ({answers})
+      data: ({answers, availableIndexes})
     })
   }
 
@@ -105,7 +106,9 @@ class AnswerController {
    */
   async update ({ params, request, response }) {
     const answers = await Answer.query().where('crossword_id',params.id).fetch()
-    const userAnswer = ['G','A','J','A','H','','','','','','S','','','','','','','','','','','','','','']
+    
+    let userAnswer = request.only(['answers'])
+    userAnswer = userAnswer.answers
 
     let answerIndex = [], answerId = [], rightAnswer = [], ownAnswer = [], finished 
     
@@ -115,7 +118,7 @@ class AnswerController {
       rightAnswer.push(answer.answer)
       // console.log(answer.indexes.split(' '));
     })
-    // console.log(rightAnswer);
+    // console.log(userAnswer.answers);
 
     
     for(let i = 0; i < answerIndex.length; i++){
@@ -123,21 +126,25 @@ class AnswerController {
         for(let j = 0; j < answerIndex[i].length; j++){
             for(let k = 0; k < userAnswer.length; k++){
                 if(answerIndex[i][j] == k){
-                    if(userAnswer[k]!=''){
+                    if(userAnswer[k]!=null){
                         toSubmit+=userAnswer[k]
                       }else{
-                          toSubmit+=" "
+                        toSubmit+=" "
                       }
                 }
               }
             }
+            
       await UserAnswer.query().where('user_id',"2").andWhere('answer_id',answerId[i]).update({answer:toSubmit})
+      console.log(toSubmit);
     }
     
+    
     const answerFromUser = await Answer.query().where('crossword_id',params.id).with('user_answers', ua => ua.where('user_id','2')).fetch()
+    
     answerFromUser.rows.map( a => {
       a.$relations.user_answers.rows.map( rel => {
-        console.log(rel.answer);
+        // console.log(rel.answer);
         ownAnswer.push(rel.answer)
       })
     })
@@ -155,8 +162,8 @@ class AnswerController {
     }else{
       await UserCrossword.query().where('user_id',"2").andWhere('crossword_id',params.id).update({is_finished:false})
     }      
-    response.status(200).json({
-      message: "Successfully updated answers with related crosswords",
+    response.status(200).send({
+      message: "Successfully submitted answers",
       data:{ownAnswer, finished}
     })
   }
