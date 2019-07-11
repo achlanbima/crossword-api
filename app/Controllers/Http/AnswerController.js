@@ -7,6 +7,7 @@
 const Answer = use('App/Models/Answer')
 const UserAnswer = use('App/Models/UserAnswer')
 const UserCrossword = use('App/Models/UserCrossword')
+const User = use('App/Models/User')
 
 /**
  * Resourceful controller for interacting with answers
@@ -25,7 +26,7 @@ class AnswerController {
     const answer = await Answer.query().with('crossword', c => c.select('id','name')).fetch()
     
 
-    response.status(200).json({
+    response.status(200).send({
       message: "Successfully retrieved crosswords",
       data: answer
     })
@@ -40,7 +41,28 @@ class AnswerController {
    * @param {Response} ctx.response
    * @param {View} ctx.view
    */
-  async create ({ request, response, view }) {
+  async create ({ request, response, view, params }) {
+
+    const users = await User.all()
+
+    const userIds = users.rows.map(user => {
+      return user.id
+    })
+
+    const {number,question,answer,is_clue,indexes,type} = request.all();
+    const answers = await Answer.create({
+      crossword_id: params.id,
+      number,
+      question,
+      answer,
+      is_clue,
+      indexes,
+      type
+    })   
+
+    await answers.users().attach(userIds)
+
+    return response.status(200).send({message: "New Answers created", data:answers})
   }
 
   /**
@@ -52,6 +74,7 @@ class AnswerController {
    * @param {Response} ctx.response
    */
   async store ({ request, response }) {
+
   }
 
   /**
@@ -63,10 +86,12 @@ class AnswerController {
    * @param {Response} ctx.response
    * @param {View} ctx.view
    */
-  async show ({ params, request, response, view }) {
+  async show ({ params, request, response, auth }) {
+    // const userLogin = (await auth.getUser()).id
     const answers = await Answer.query().where('crossword_id',params.id).fetch()
     // const userAnswers = await UserAnswer.query().where('user_id',1).fetch()
-
+    
+    
     let availableIndexes = []
     answers.rows.map((row, index) => {
       if(row.is_clue){
@@ -80,7 +105,7 @@ class AnswerController {
 
     response.status(200).json({
       message: "Successfully retrieved answers with related crosswords",
-      data: ({answers, availableIndexes})
+      data: ({ answers, availableIndexes})
     })
   }
 
@@ -104,7 +129,8 @@ class AnswerController {
    * @param {Request} ctx.request
    * @param {Response} ctx.response
    */
-  async update ({ params, request, response }) {
+  async update ({ params, request, response , auth }) {
+    const userId = await auth.getUser()
     const answers = await Answer.query().where('crossword_id',params.id).fetch()
     
     let userAnswer = request.only(['answers'])
@@ -135,12 +161,12 @@ class AnswerController {
               }
             }
             
-      await UserAnswer.query().where('user_id',"2").andWhere('answer_id',answerId[i]).update({answer:toSubmit})
-      console.log(toSubmit);
+      await UserAnswer.query().where('user_id',userId.id).andWhere('answer_id',answerId[i]).update({answer:toSubmit})
+      // console.log(toSubmit);
     }
     
     
-    const answerFromUser = await Answer.query().where('crossword_id',params.id).with('user_answers', ua => ua.where('user_id','2')).fetch()
+    const answerFromUser = await Answer.query().where('crossword_id',params.id).with('user_answers', ua => ua.where('user_id',userId.id)).fetch()
     
     answerFromUser.rows.map( a => {
       a.$relations.user_answers.rows.map( rel => {
@@ -158,9 +184,9 @@ class AnswerController {
       }
     }
     if(finished){
-      await UserCrossword.query().where('user_id',"2").andWhere('crossword_id',params.id).update({is_finished:true})
+      await UserCrossword.query().where('user_id',userId.id).andWhere('crossword_id',params.id).update({is_finished:true})
     }else{
-      await UserCrossword.query().where('user_id',"2").andWhere('crossword_id',params.id).update({is_finished:false})
+      await UserCrossword.query().where('user_id',userId.id).andWhere('crossword_id',params.id).update({is_finished:false})
     }      
     response.status(200).send({
       message: "Successfully submitted answers",

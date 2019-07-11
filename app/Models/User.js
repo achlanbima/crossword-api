@@ -45,6 +45,10 @@ class User extends Model {
       .pivotTable('user_answers')
   }
 
+  user_crossword() {
+    return this.hasMany('App/Models/UserCrossword')
+  }
+
 }
 
 module.exports = User

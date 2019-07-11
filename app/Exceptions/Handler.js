@@ -21,7 +21,19 @@ class ExceptionHandler extends BaseExceptionHandler {
    * @return {void}
    */
   async handle (error, { request, response }) {
-    response.status(error.status).send({status:error.status,message:error.message})
+    response.status(error.status).send({status:error.status,message:error.message,name:error.name})
+    if(error.name == 'InvalidJwtToken'){
+      response.status(error.status).send({status:error.status, message:"Token Salah"})
+    }
+    if(error.name == 'UserNotFoundException'){
+      response.status(error.status).send({status:error.status, message:"Email/Password Salah"})
+    }
+    if(error.name == 'PasswordMisMatchException'){
+      response.status(error.status).send({status:error.status, message:"Password Salah"})
+    }
+    if(error.name == 'HttpException'){
+      response.status(error.status).send({status:error.status, message:"Gagal mengambil data dari server"})
+    }
   }
 
   /**

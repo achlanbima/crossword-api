@@ -19,12 +19,14 @@ const Route = use('Route')
 
 Route.post('/register', 'AuthController.register')
 Route.post('/login', 'AuthController.login')
-
+Route.get('/logout','AuthController.logout')
 
 Route.group(()=>{
-  Route.get('/', 'CrosswordController.index')
-  Route.get('/:id/answers', 'AnswerController.show')
-  Route.patch('/:id/answers', 'AnswerController.update')
+  Route.get('/', 'CrosswordController.index').middleware('auth')
+  Route.post('/', 'CrosswordController.create').middleware('auth')
+  Route.post('/:id', 'AnswerController.create').middleware('auth')
+  Route.get('/:id/answers', 'AnswerController.show').middleware('auth')
+  Route.patch('/:id/answers', 'AnswerController.update').middleware('auth')
 }).prefix('crosswords')
 
 Route.group(()=>{

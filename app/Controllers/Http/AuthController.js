@@ -32,11 +32,11 @@ class AuthController {
 
     if (validation.fails()) {
       if(validation._errorMessages[0].validation == "email"){
-        return response.status(500).send({message:"email format required!"})  
+        return response.status(500).send({message:"Email harus berformat email (**@**.**)"})  
       }else if(validation._errorMessages[0].validation == "required"){
         return response.status(500).send({message: `${validation._errorMessages[0].field} required`})
       }else if(validation._errorMessages[0].validation == "unique"){
-        return response.status(500).send({message: `${validation._errorMessages[0].field} already used`})
+        return response.status(500).send({message: `${validation._errorMessages[0].field} Sudah Ada`})
       }
     }
 
@@ -66,7 +66,6 @@ class AuthController {
     const token = await auth.attempt(email, password)
     return response.json({token})
 }
-
 
 }
 module.exports = AuthController

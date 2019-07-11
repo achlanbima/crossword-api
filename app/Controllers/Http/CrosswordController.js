@@ -5,6 +5,7 @@
 /** @typedef {import('@adonisjs/framework/src/View')} View */
 
 const Crossword = use('App/Models/Crossword')
+const User = use('App/Models/User')
 
 /**
  * Resourceful controller for interacting with crosswords
@@ -19,8 +20,12 @@ class CrosswordController {
    * @param {Response} ctx.response
    * @param {View} ctx.view
    */
-  async index ({ request, response, view }) {
-    const crossword = await Crossword.query().with('user_crossword', uc => uc.where('user_id','2')).fetch();
+  async index ({ request, response, view, auth }) {
+    const userId = await auth.getUser()
+    // console.log(userId.id);
+    
+    const crossword = await Crossword.query().with('user_crossword', uc => uc.where('user_id',userId.id)).fetch();
+    const user = await User.query().select('id', 'username').where('id',userId.id).first()
 
     crossword.rows.map((cw) => {
       cw.$relations.user_crossword.rows.map((ucw) => {
@@ -36,7 +41,8 @@ class CrosswordController {
 
     response.status(200).json({
       message: "Successfully retrieved crosswords",
-      data: crossword
+      data: crossword,
+      userData : user
     })
   }
 
@@ -50,6 +56,22 @@ class CrosswordController {
    * @param {View} ctx.view
    */
   async create ({ request, response, view }) {
+    const users = await User.all()
+
+    const userIds = users.rows.map(user => {
+      return user.id
+    })
+
+    const {name,total_column} = request.only(['name','total_column'])
+
+    const crossword = await Crossword.create({
+      name,
+      total_column
+    })
+
+    await crossword.users().attach(userIds)
+
+    return response.status(200).send({message: "New Crosswords created", data:crossword})
   }
 
   /**

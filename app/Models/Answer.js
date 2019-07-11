@@ -4,6 +4,14 @@
 const Model = use('Model')
 
 class Answer extends Model {
+  static get createdAtColumn () {
+    return null;
+  }
+
+  static get updatedAtColumn () {
+    return null;
+  }
+  
   crossword(){
     return this.belongsTo('App/Models/Crossword')
   }

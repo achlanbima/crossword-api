@@ -4,6 +4,13 @@
 const Model = use('Model')
 
 class Crossword extends Model {
+  static get createdAtColumn () {
+    return null;
+  }
+
+  static get updatedAtColumn () {
+    return null;
+  }
 
   answers(){
     return this.hasMany('App/Models/Answer')

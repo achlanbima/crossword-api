@@ -13,7 +13,7 @@ class UserAnswer extends Model {
   }
   
   answers(){
-    return this.belongsTo('App/Models/Answers')
+    return this.belongsTo('App/Models/Answer')
   }
 }
 

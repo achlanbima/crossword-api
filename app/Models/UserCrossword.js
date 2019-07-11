@@ -12,7 +12,10 @@ class UserCrossword extends Model {
     return null;
   }
   crossword(){
-    return this.belongsTo('App/Models/Crosswords')
+    return this.belongsTo('App/Models/Crossword')
+  }
+  users(){
+    return this.belongsTo('App/Models/User')
   }
 }
 
