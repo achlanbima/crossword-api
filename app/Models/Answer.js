@@ -19,6 +19,7 @@ class Answer extends Model {
   users () {
     return this.belongsToMany('App/Models/User')
       .pivotTable('user_answers')
+      .withPivot('answer')
   }
 
   user_answers () {

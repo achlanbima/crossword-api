@@ -43,6 +43,7 @@ class User extends Model {
   answers () {
     return this.belongsToMany('App/Models/Answer')
       .pivotTable('user_answers')
+      .withPivot('answer')
   }
 
   user_crossword() {

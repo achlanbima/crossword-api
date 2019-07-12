@@ -22,13 +22,35 @@ class AnswerController {
    * @param {Response} ctx.response
    * @param {View} ctx.view
    */
-  async index ({ request, response, view }) {
-    const answer = await Answer.query().with('crossword', c => c.select('id','name')).fetch()
+  async index ({ request, response, view , auth}) {
+    const token = await auth.getUser()
+    // const answer = await Answer.query().with('crossword', c => c.select('id','name')).fetch()
+    const user = await User.query().select('id','username').where('id',token.id).with('answers').first()
+
+    let answerIndex = [], userAnswer = [], userAnswersIndex = [], finalAnswersIndex = []
+    user.$relations.answers.rows.map(answer => {
+      answerIndex.push(answer.indexes.split(' '))
+      userAnswer = [...userAnswer, { crosswordId:answer.crossword_id, answer:answer.$relations.pivot.answer.split('')}]
+    })
+
+    for(let i = 0; i < answerIndex.length; i++){
+      for(let j = 0; j < answerIndex[i].length; j++){
+        userAnswersIndex[answerIndex[i][j]] = userAnswer[i].answer[j]
+        if(typeof userAnswersIndex[answerIndex[i][j]] == 'undefined' || userAnswersIndex[answerIndex[i][j]] == null){
+          userAnswersIndex[answerIndex[i][j]] = null
+        }
+      }
+    }
+
+    // console.log(userAnswersIndex);
     
+    // console.log(answerIndex);
+    // console.log(user.$relations.answers.rows)
 
     response.status(200).send({
       message: "Successfully retrieved crosswords",
-      data: answer
+      // data: user,
+      answers : finalAnswersIndex
     })
   }
 
@@ -100,9 +122,10 @@ class AnswerController {
         row.is_clue = false  
       }
       row.indexes = row.indexes.split(' ')
-      availableIndexes.push(row.indexes)
+      availableIndexes = [...availableIndexes,row.indexes]
     })
 
+    availableIndexes.join(',')
     response.status(200).json({
       message: "Successfully retrieved answers with related crosswords",
       data: ({ answers, availableIndexes})
