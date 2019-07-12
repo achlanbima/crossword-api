@@ -22,12 +22,12 @@ Route.post('/login', 'AuthController.login')
 Route.get('/logout','AuthController.logout')
 
 Route.group(()=>{
-  Route.get('/', 'CrosswordController.index').middleware('auth')
-  Route.post('/', 'CrosswordController.create').middleware('auth')
-  Route.post('/:id', 'AnswerController.create').middleware('auth')
-  Route.get('/:id/answers', 'AnswerController.show').middleware('auth')
-  Route.patch('/:id/answers', 'AnswerController.update').middleware('auth')
-}).prefix('crosswords')
+  Route.get('/', 'CrosswordController.index')
+  Route.post('/', 'CrosswordController.create')
+  Route.post('/:id', 'AnswerController.create')
+  Route.get('/:id/answers', 'AnswerController.show')
+  Route.patch('/:id/answers', 'AnswerController.update')
+}).prefix('crosswords').middleware('auth')
 
 Route.group(()=>{
   Route.get('/', 'AnswerController.index')
